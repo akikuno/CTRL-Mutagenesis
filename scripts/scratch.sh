@@ -24,7 +24,7 @@ done
 
 for fq in data/Alignment_1/20220227_214619/Fastq/*R1*.gz; do
     sample_name=$(basename "$fq" | cut -d "_" -f 1)
-    # 辞書順にソートする都合上、サンプル番号1-1などを"1-01”と変更いたします
+    # 辞書順にソートする都合上、サンプル番号1-1などを"1-01”と変更します
     sample_name=$(echo $sample_name | sed "s/-\([1-9]\)$/-0\1/")
     echo $sample_name
     # リード数を数えます
@@ -47,9 +47,9 @@ rm tmp.csv
 for fq in data/Alignment_1/20220227_214619/Fastq/*.gz; do
     sample_name=$(basename "$fq" | cut -d "_" -f 1)
     if echo "$fq" | grep -q "_R1_"; then
-        sample_name="$sample_name"_R1
+        index="R1"
     else
-        sample_name="$sample_name"_R2
+        index="R2"
     fi
     sample_name=$(echo $sample_name | sed "s/-\([1-9]\)_/-0\1_/")
     # 17種類のgRNAに対してマッチしたリードをカウントします
@@ -58,13 +58,18 @@ for fq in data/Alignment_1/20220227_214619/Fastq/*.gz; do
         grna_fw=$(cat misc/grna.csv | cut -d, -f 2 | head -n "$i" | tail -n 1)
         grna_rv=$(echo "$grna_fw" | tr "ACGT" "TGCA" | rev)
         gzip -dc "$fq" |
-            grep -e "$grna_fw" -e "$grna_rv" |
-            wc -l |
-            sed "s|^|${sample_name},${id},${grna_fw},${grna_rv},|" |
+            grep -c -e "$grna_fw" -e "$grna_rv" |
+            sed "s|^|${sample_name},${index},${id},${grna_fw},${grna_rv},|" |
             cat >>tmp.csv
     done
 done
 
-sort tmp.csv >reports/read_numbers_by_grnas.csv
+sort tmp.csv |
+    # ヘッダー行を挿入します
+    awk 'BEGIN{print "sample_name,index,id,grna_fw,grna_rv,read number"}1' |
+    cat >reports/read_numbers_by_grnas.csv
 
 rm tmp.csv
+
+#* gRNA配列がないリード数も一覧に乗せる
+#* ggplot2で可視化
