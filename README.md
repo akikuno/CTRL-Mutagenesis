@@ -18,5 +18,5 @@ conda config --add channels conda-forge
 conda install -y fastqc
 
 # R言語
-conda install -y r-base r-essentials
+conda install -y r-base r-essentials r-ggsci
 ```
