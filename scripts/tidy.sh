@@ -1,12 +1,7 @@
 #!/bin/bash
 
-# rm data/Alignment_1/20220227_214619/Fastq/*.fastq
-
-ls -lh data/Alignment_1/20220227_214619/Fastq/
-zcat data/Alignment_1/20220227_214619/Fastq/1-1_S1_L001_R1_001.fastq.gz | head
-
 ###############################################################################
-# fastqc
+# quality check
 ###############################################################################
 
 mkdir -p reports/fastqc
@@ -19,6 +14,10 @@ done
 ###############################################################################
 # count read numbers
 ###############################################################################
+
+#------------------------------------------------------------------------------
+## Count total reads
+#------------------------------------------------------------------------------
 
 : >tmp.csv
 
@@ -39,9 +38,9 @@ sort tmp.csv >reports/read_numbers.csv
 
 rm tmp.csv
 
-###############################################################################
-# count gRNAs
-###############################################################################
+#------------------------------------------------------------------------------
+## Count reads with gRNAs
+#------------------------------------------------------------------------------
 
 : >tmp_grna.csv
 for fq in data/Alignment_1/20220227_214619/Fastq/*.gz; do
@@ -95,6 +94,10 @@ cat tmp_grna.csv tmp_nogrna.csv |
     awk 'BEGIN{print "sample_name,index,id,grna_fw,grna_rv,read number"}1' |
     cat >reports/read_numbers_by_grnas.csv
 
+rm tmp*
+
+### supplementary  --------------------------------------------------
+
 # 合計リード数の確認
 # fq=data/Alignment_1/20220227_214619/Fastq/1-1_S1_L001_R2_001.fastq.gz
 # zcat $fq | grep "^@" | wc -l # 243,342配列
@@ -102,5 +105,3 @@ cat tmp_grna.csv tmp_nogrna.csv |
 # cat reports/read_numbers_by_grnas.csv |
 #     grep 1-01,R2 |
 #     awk -F, '{sum+=$NF} END{print sum}' # 243,342
-
-rm tmp.csv

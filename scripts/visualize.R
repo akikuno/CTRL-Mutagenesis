@@ -1,11 +1,22 @@
 library(tidyverse)
 library(RColorBrewer)
 
-colors <- colorRampPalette(brewer.pal(8, "Set2"))(18)
-
 readnum <- read_csv("reports/read_numbers_by_grnas.csv")
 
-g <-
+readnum <-
+    readnum %>%
+    group_by(sample_name, index) %>%
+    mutate(total_reads = sum(`read number`)) %>%
+    mutate(per_reads = `read number` / total_reads * 100)
+
+
+###############################################################################
+# Visualization
+###############################################################################
+
+colors <- colorRampPalette(brewer.pal(8, "Set2"))(18)
+
+g_count <-
     ggplot(readnum, aes(x = id, y = `read number`, fill = id)) +
     geom_bar(stat = "identity") +
     scale_fill_manual(values = colors) +
@@ -13,5 +24,16 @@ g <-
     theme(plot.background = element_rect(fill = "white")) +
     facet_wrap(~ sample_name + index, scale = "free_y", ncol = 4)
 
-ggsave("reports/read_count.png", g, width = 15, height = 20)
-ggsave("reports/read_count.pdf", g, width = 15, height = 20)
+ggsave("reports/read_count.png", g_count, width = 15, height = 20)
+ggsave("reports/read_count.pdf", g_count, width = 15, height = 20)
+
+g_percent <-
+    ggplot(readnum, aes(x = id, y = per_reads, fill = id)) +
+    geom_bar(stat = "identity") +
+    scale_fill_manual(values = colors) +
+    theme_bw() +
+    theme(plot.background = element_rect(fill = "white")) +
+    facet_wrap(~ sample_name + index, scale = "free_y", ncol = 4)
+
+ggsave("reports/read_percent.png", g_percent, width = 15, height = 20)
+ggsave("reports/read_percent.pdf", g_percent, width = 15, height = 20)
