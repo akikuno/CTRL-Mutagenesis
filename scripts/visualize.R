@@ -1,7 +1,7 @@
 library(tidyverse)
 library(RColorBrewer)
 
-readnum <- read_csv("reports/read_numbers_by_grnas.csv")
+readnum <- read_csv(str_glue("reports/{Sys.Date()}/read_numbers_by_grnas.csv"))
 
 readnum <-
     readnum %>%
@@ -24,8 +24,8 @@ g_count <-
     theme(plot.background = element_rect(fill = "white")) +
     facet_wrap(~ sample_name + index, scale = "free_y", ncol = 4)
 
-ggsave("reports/read_count.png", g_count, width = 15, height = 20)
-ggsave("reports/read_count.pdf", g_count, width = 15, height = 20)
+ggsave(str_glue("reports/{Sys.Date()}/read_count.png"), g_count, width = 15, height = 20)
+ggsave(str_glue("reports/{Sys.Date()}/read_count.pdf"), g_count, width = 15, height = 20)
 
 g_percent <-
     ggplot(readnum, aes(x = id, y = per_reads, fill = id)) +
@@ -35,5 +35,5 @@ g_percent <-
     theme(plot.background = element_rect(fill = "white")) +
     facet_wrap(~ sample_name + index, scale = "free_y", ncol = 4)
 
-ggsave("reports/read_percent.png", g_percent, width = 15, height = 20)
-ggsave("reports/read_percent.pdf", g_percent, width = 15, height = 20)
+ggsave(str_glue("reports/{Sys.Date()}/read_percent.png"), g_percent, width = 15, height = 20)
+ggsave(str_glue("reports/{Sys.Date()}/read_percent.pdf"), g_percent, width = 15, height = 20)

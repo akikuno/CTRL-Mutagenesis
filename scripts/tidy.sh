@@ -1,19 +1,24 @@
 #!/bin/bash
 
-###############################################################################
-# quality check
-###############################################################################
+fastq_path="data/20220425_FS10002129_2_BPN80007-1119/Alignment_1/20220426_164553/Fastq/"
+reports_dir=reports/"$(date '+%Y-%m-%d')/"
 
-mkdir -p reports/fastqc
+# ###############################################################################
+# # quality check
+# ###############################################################################
 
-for fq in data/Alignment_1/20220227_214619/Fastq/*.gz; do
-    echo $fq
-    fastqc "$fq" -o reports/fastqc
-done
+# mkdir -p "$reports_dir"/fastqc
+
+# for fq in "$fastq_path"/*.gz; do
+#     echo $fq
+#     fastqc "$fq" -o "$reports_dir"/fastqc
+# done
 
 ###############################################################################
 # count read numbers
 ###############################################################################
+
+mkdir -p "$reports_dir"/
 
 #------------------------------------------------------------------------------
 ## Count total reads
@@ -21,7 +26,7 @@ done
 
 : >tmp.csv
 
-for fq in data/Alignment_1/20220227_214619/Fastq/*R1*.gz; do
+for fq in "$fastq_path"/*R1*.gz; do
     sample_name=$(basename "$fq" | cut -d "_" -f 1)
     # 辞書順にソートする都合上、サンプル番号1-1などを"1-01”と変更します
     sample_name=$(echo $sample_name | sed "s/-\([1-9]\)$/-0\1/")
@@ -34,7 +39,7 @@ for fq in data/Alignment_1/20220227_214619/Fastq/*R1*.gz; do
         cat >>tmp.csv
 done
 
-sort tmp.csv >reports/read_numbers.csv
+sort tmp.csv >"$reports_dir"/read_numbers.csv
 
 rm tmp.csv
 
@@ -43,7 +48,7 @@ rm tmp.csv
 #------------------------------------------------------------------------------
 
 : >tmp_grna.csv
-for fq in data/Alignment_1/20220227_214619/Fastq/*.gz; do
+for fq in "$fastq_path"/*.gz; do
     sample_name=$(basename "$fq" | cut -d "_" -f 1 | sed "s/-\([1-9]\)$/-0\1/")
     echo $sample_name
     if echo "$fq" | grep -q "_R1_"; then
@@ -53,8 +58,8 @@ for fq in data/Alignment_1/20220227_214619/Fastq/*.gz; do
     fi
     # 17種類のgRNAに対してマッチしたリードをカウントします
     for i in $(seq 1 17); do
-        id=$(cat misc/grna.csv | cut -d, -f 1 | head -n "$i" | tail -n 1)
-        grna_fw=$(cat misc/grna.csv | cut -d, -f 2 | head -n "$i" | tail -n 1)
+        id=$(cat data/grna.csv | cut -d, -f 1 | head -n "$i" | tail -n 1)
+        grna_fw=$(cat data/grna.csv | cut -d, -f 2 | head -n "$i" | tail -n 1)
         grna_rv=$(echo "$grna_fw" | tr "ACGT" "TGCA" | rev)
         gzip -dc "$fq" |
             grep -c -e "$grna_fw" -e "$grna_rv" |
@@ -67,12 +72,11 @@ done
 ## Count reads without gRNAs
 #------------------------------------------------------------------------------
 
-cat misc/grna.csv | cut -d, -f 2 >tmp_grnalist.csv
-cat misc/grna.csv | cut -d, -f 2 | tr ACGT TGCA | rev >>tmp_grnalist.csv
-cat tmp_grnalist.csv | wc -l
+cat data/grna.csv | cut -d, -f 2 >tmp_grnalist.csv
+cat data/grna.csv | cut -d, -f 2 | tr ACGT TGCA | rev >>tmp_grnalist.csv
 
 : >tmp_nogrna.csv
-for fq in data/Alignment_1/20220227_214619/Fastq/*.gz; do
+for fq in "$fastq_path"/*.gz; do
     sample_name=$(basename "$fq" | cut -d "_" -f 1 | sed "s/-\([1-9]\)$/-0\1/")
     echo $sample_name
     if echo "$fq" | grep -q "_R1_"; then
@@ -92,16 +96,16 @@ cat tmp_grna.csv tmp_nogrna.csv |
     sort |
     # ヘッダー行を挿入します
     awk 'BEGIN{print "sample_name,index,id,grna_fw,grna_rv,read number"}1' |
-    cat >reports/read_numbers_by_grnas.csv
+    cat >"$reports_dir"/read_numbers_by_grnas.csv
 
 rm tmp*
 
 ### supplementary  --------------------------------------------------
 
 # 合計リード数の確認
-# fq=data/Alignment_1/20220227_214619/Fastq/1-1_S1_L001_R2_001.fastq.gz
+# fq="$fastq_path"/1-1_S1_L001_R2_001.fastq.gz
 # zcat $fq | grep "^@" | wc -l # 243,342配列
 
-# cat reports/read_numbers_by_grnas.csv |
+# cat "$reports_dir"/read_numbers_by_grnas.csv |
 #     grep 1-01,R2 |
 #     awk -F, '{sum+=$NF} END{print sum}' # 243,342
