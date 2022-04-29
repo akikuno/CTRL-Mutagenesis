@@ -10,13 +10,18 @@
   - [WSL2のインストールについて](https://docs.microsoft.com/ja-jp/windows/wsl/install)
 
 ```bash
-conda config --add channels defaults
-conda config --add channels bioconda
-conda config --add channels conda-forge
-
-# NGS関連ツール
-conda install -y fastqc
-
-# R言語
-conda install -y r-base r-essentials r-ggsci
+conda install -y r-base r-essentials
 ```
+
+## 使用方法
+
+1. gRNAの配列情報を`data/grna.csv`を参考に更新してください。
+
+2. `scripts/00-format.sh`の`fastq_path`と`grna_path`にそれぞれのパスを入力して、以下のコマンドを実行してください
+
+```bash
+bash scripts/00-format.sh
+Rscript --vanilla scripts/01-visualize.R
+```
+
+3. `reports/{解析日時}`のフォルダの中に結果一覧が出力されます。
