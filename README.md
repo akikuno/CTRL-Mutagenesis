@@ -21,7 +21,7 @@ conda install -y r-base r-essentials
 
 ```bash
 bash scripts/00-format.sh
-Rscript --vanilla scripts/01-visualize.R
+Rscript --vanilla --slave scripts/01-visualize.R
 ```
 
 3. `reports/{解析日時}`のフォルダの中に結果一覧が出力されます。

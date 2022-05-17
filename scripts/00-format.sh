@@ -1,6 +1,6 @@
 #!/bin/bash
 
-fastq_path="data/20220425_FS10002129_2_BPN80007-1119/Alignment_1/20220426_164553/Fastq/"
+fastq_path="data/Fastq_20220517"
 grna_path="data/grna.csv"
 
 ###############################################################################
