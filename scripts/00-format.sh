@@ -1,7 +1,14 @@
 #!/bin/bash
 
 fastq_path="data/Fastq_20220517"
-grna_path="data/grna.csv"
+grna_path="data/grna2.csv"
+
+###############################################################################
+# format line code
+###############################################################################
+
+cat "$grna_path" | tr -d "\r" >tmp_grna_path.csv
+grna_path="tmp_grna_path.csv"
 
 ###############################################################################
 # make output directory
