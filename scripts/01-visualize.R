@@ -5,10 +5,10 @@ readnum <- read_csv(str_glue("reports/{Sys.Date()}/read_numbers_by_grnas.csv"))
 
 readnum <-
     readnum %>%
+    mutate(sample_name = fct_inorder(sample_name)) %>%
     group_by(sample_name, index) %>%
     mutate(total_reads = sum(`read number`)) %>%
     mutate(per_reads = `read number` / total_reads * 100)
-
 
 ###############################################################################
 # Visualization

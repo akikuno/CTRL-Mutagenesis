@@ -72,7 +72,7 @@ for fq in "$fastq_path"/*.gz; do
 done
 
 cat tmp_grna.csv tmp_nogrna.csv |
-    sort |
+    sort -n |
     # ヘッダー行を挿入します
     awk 'BEGIN{print "sample_name,index,id,grna_fw,grna_rv,read number"}1' |
     cat >"$reports_dir"/read_numbers_by_grnas.csv
