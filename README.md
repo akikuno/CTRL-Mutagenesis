@@ -1,30 +1,29 @@
 # Project-hybrid-sterility
 
-森本さんとの共同研究です
+- The code quantifies the amount of each gRNA integration for each ES clone.
+
+# Requirements
+
+- bash
+- R (>3.6)
+  - tidyverse
+  - RColorBrewer
 
 
-## 環境構築
+# Procedure
 
-- [condaをインストール](https://conda.io/en/latest/miniconda.html)してください。
-  - **WindowsはWSL2をセットアップし、Linux版のcondaをインストールしてください。**
-  - [WSL2のインストールについて](https://docs.microsoft.com/ja-jp/windows/wsl/install)
+- Prepare a directory including FASTQ files
+- Save the gRNA sequence information in CSV format with the first column as ID and the second column as sequences
+  - Refer to `data/grna.csv`.
 
-```bash
-conda config --add channels defaults
-conda config --add channels bioconda
-conda config --add channels conda-forge
-conda install -y r-base r-essentials
-```
-
-## 使用方法
-
-1. gRNAの配列情報を`data/grna.csv`を参考に更新してください。
-
-2. `scripts/00-format.sh`の`fastq_path`と`grna_path`にそれぞれのパスを入力して、以下のコマンドを実行してください
+- Based on the PATH of the FASTQ directory and the gRNA sequence table, run the following command
 
 ```bash
-bash scripts/00-format.sh
+bash scripts/00-format.sh {path_fastqs} {path_grna}
 Rscript --vanilla --slave scripts/01-visualize.R
 ```
 
-3. `reports/{解析日時}`のフォルダの中に結果一覧が出力されます。
+## Output
+
+- Results are outputted in the folder `reports/{analysis date}`.
+  - Refer to `reports/2022-05-30`

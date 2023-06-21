@@ -1,7 +1,7 @@
 #!/bin/bash
 
-fastq_path="data/Fastq_20220517"
-grna_path="data/grna2.csv"
+fastq_path="$1"
+grna_path="$2"
 
 ###############################################################################
 # format line code
