@@ -1,6 +1,6 @@
 # Project-hybrid-sterility
 
-- The code quantifies the amount of each gRNA integration for each ES clone.
+- The code quantifies the amount of 17 sgRNA cassettes for each mES clone.
 
 # Requirements
 
