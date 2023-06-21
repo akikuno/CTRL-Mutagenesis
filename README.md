@@ -1,4 +1,4 @@
-# Project-hybrid-sterility
+# CTRL-Mutagenesis
 
 - The code quantifies the amount of 17 sgRNA cassettes for each mES clone.
 
