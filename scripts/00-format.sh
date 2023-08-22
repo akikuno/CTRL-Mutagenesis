@@ -35,7 +35,7 @@ for fq in "$fastq_path"/*.gz; do
     else
         index="R2"
     fi
-    # 17種類のgRNAに対してマッチしたリードをカウントします
+    # Count read numbers including each gRNA sequence
     for i in $(seq 1 17); do
         id=$(cat "$grna_path" | cut -d, -f 1 | head -n "$i" | tail -n 1)
         grna_fw=$(cat "$grna_path" | cut -d, -f 2 | head -n "$i" | tail -n 1)
@@ -73,7 +73,7 @@ done
 
 cat tmp_grna.csv tmp_nogrna.csv |
     sort -n |
-    # ヘッダー行を挿入します
+    # Insert header line
     awk 'BEGIN{print "sample_name,index,id,grna_fw,grna_rv,read number"}1' |
     cat >"$reports_dir"/read_numbers_by_grnas.csv
 
