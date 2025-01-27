@@ -1,3 +1,8 @@
+<!--
+# Author: Akihiro Kuno (akuno@md.tsukuba.ac.jp)
+# Last updated: 2025-01-27
+ -->
+
 # CTRL-Mutagenesis
 
 - The code quantifies the amount of sgRNA cassettes in FASTQ reads.

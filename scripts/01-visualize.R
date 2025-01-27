@@ -1,3 +1,9 @@
+###########################################################
+# Script: Visualize the read numbers by gRNAs
+# Author: Akihiro Kuno (akuno@md.tsukuba.ac.jp)
+# Last updated: 2025-01-27
+###########################################################
+
 suppressPackageStartupMessages({
     library(tidyverse)
 })
