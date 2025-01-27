@@ -7,6 +7,8 @@ grna_path="$2"
 # format line code
 ###############################################################################
 
+# Remove CR code: CR codes can cause unexpected behavior or errors in bash, so they will be removed.
+
 cat "$grna_path" | tr -d "\r" >tmp_grna_path.csv
 grna_path="tmp_grna_path.csv"
 
@@ -17,6 +19,7 @@ grna_path="tmp_grna_path.csv"
 reports_dir=reports/"$(date '+%Y-%m-%d')/"
 
 mkdir -p "$reports_dir"/
+echo "*" >"$reports_dir"/.gitignore
 
 ###############################################################################
 # count read numbers
@@ -26,47 +29,68 @@ mkdir -p "$reports_dir"/
 ## Count reads with gRNAs
 #------------------------------------------------------------------------------
 
-: >tmp_grna.csv
+true >tmp_grna.csv
 for fq in "$fastq_path"/*.gz; do
+    # 最後のsedは、得られた文字列の末尾にある1桁の数字をゼロ埋めして、2桁のフォーマットに統一するためのものです
     sample_name=$(basename "$fq" | cut -d "_" -f 1 | sed "s/-\([1-9]\)$/-0\1/")
-    echo "$sample_name"
     if echo "$fq" | grep -q "_R1_"; then
         index="R1"
     else
         index="R2"
     fi
-    # Count read numbers including each gRNA sequence
-    for i in $(seq 1 17); do
-        id=$(cat "$grna_path" | cut -d, -f 1 | head -n "$i" | tail -n 1)
-        grna_fw=$(cat "$grna_path" | cut -d, -f 2 | head -n "$i" | tail -n 1)
-        grna_rv=$(echo "$grna_fw" | tr "ACGT" "TGCA" | rev)
-        gzip -dc "$fq" |
-            grep -c -e "$grna_fw" -e "$grna_rv" |
-            sed "s|^|${sample_name},${index},${id},${grna_fw},${grna_rv},|" |
-            cat >>tmp_grna.csv
-    done
+
+    echo "Counting gRNA reads in ${sample_name} ${index}..."
+
+    cat "$grna_path" |
+        tr "," " " |
+        while read -r id grna_fw; do
+            # Convert to uppercase
+            grna_fw=$(echo "$grna_fw" | tr "acgt" "ACGT")
+
+            # Reverse complement
+            grna_rv=$(echo "$grna_fw" | tr "ACGT" "TGCA" | rev)
+
+            # Count read numbers
+            gzip -dc "$fq" |
+                paste - - - - |
+                cut -f 2 |
+                grep -i -c -e "$grna_fw" -e "$grna_rv" |
+                sed "s|^|${sample_name},${index},${id},${grna_fw},${grna_rv},|" |
+                cat >>tmp_grna.csv
+        done
 done
 
 #------------------------------------------------------------------------------
 ## Count reads without gRNAs
 #------------------------------------------------------------------------------
 
-cat "$grna_path" | cut -d, -f 2 >tmp_grnalist.csv
-cat "$grna_path" | cut -d, -f 2 | tr ACGT TGCA | rev >>tmp_grnalist.csv
+cat "$grna_path" |
+    cut -d, -f 2 |
+    tr "acgt" "ACGT" |
+    tee tmp_grnalist.csv |
+    # Reverse complement
+    tr "ACGT" "TGCA" |
+    rev |
+    # Remove empty lines
+    grep ^ >>tmp_grnalist.csv
 
-: >tmp_nogrna.csv
+true >tmp_nogrna.csv
 for fq in "$fastq_path"/*.gz; do
+    # 最後のsedは、得られた文字列の末尾にある1桁の数字をゼロ埋めして、2桁のフォーマットに統一するためのものです
     sample_name=$(basename "$fq" | cut -d "_" -f 1 | sed "s/-\([1-9]\)$/-0\1/")
-    echo "$sample_name"
+
     if echo "$fq" | grep -q "_R1_"; then
         index="R1"
     else
         index="R2"
     fi
+
+    echo "Counting reads without gRNAs in ${sample_name} ${index}..."
+
     gzip -dc "$fq" |
         paste - - - - |
         cut -f 2 |
-        grep -c -v -f tmp_grnalist.csv |
+        grep -i -c -v -f tmp_grnalist.csv |
         sed "s|^|${sample_name},${index},no,no,no,|" |
         cat >>tmp_nogrna.csv
 done
@@ -77,4 +101,5 @@ cat tmp_grna.csv tmp_nogrna.csv |
     awk 'BEGIN{print "sample_name,index,id,grna_fw,grna_rv,read number"}1' |
     cat >"$reports_dir"/read_numbers_by_grnas.csv
 
-rm tmp*
+# Remove temporary files
+rm tmp_grna_path.csv tmp_grna.csv tmp_grnalist.csv tmp_nogrna.csv
