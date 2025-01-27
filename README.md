@@ -5,9 +5,8 @@
 # Requirements
 
 - bash
-- R (>3.6)
+- R (>4.0)
   - tidyverse
-  - RColorBrewer
 
 
 # Procedure
@@ -20,8 +19,12 @@
 
 ```bash
 bash scripts/00-format.sh <PATH of the FASTQ directory> <PATH of gRNA sequence table>
-Rscript --vanilla --slave scripts/01-visualize.R
+Rscript --vanilla --slave scripts/01-visualize.R -w=15 -h=50 -ncol=4
 ```
+
+- In `Rscript`, you can specify the width, height and number of colmuns of the plot using the `-w`, `-h` and `-ncol` options, respectively.
+  - The default values are `-w=15`, `-h=50` and `ncol=4`.
+
 
 ## Output
 
