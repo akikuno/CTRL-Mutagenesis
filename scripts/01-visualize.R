@@ -1,7 +1,7 @@
 ###########################################################
 # Script: Visualize the read numbers by gRNAs
-# Author: Akihiro Kuno (akuno@md.tsukuba.ac.jp)
-# Last updated: 2025-01-27
+# Author: Akihiro Kuno (akuno@gwe.md.tsukuba.ac.jp)
+# Last updated: 2025-06-10
 ###########################################################
 
 suppressPackageStartupMessages({
@@ -18,8 +18,9 @@ readnum <-
     mutate(total_reads = sum(`read number`)) %>%
     mutate(per_reads = `read number` / total_reads * 100)
 
+
 ###############################################################################
-# Visualization
+# Visualize read counts and percentages by gRNAs
 ###############################################################################
 
 # Parse command line arguments
@@ -45,20 +46,30 @@ num_id <- length(unique(readnum$id))
 colors <- rep(palette.colors(), length.out = num_id)
 
 g_count <-
-    ggplot(readnum, aes(x = id, y = `read number`, fill = id)) +
+    ggplot(readnum, aes(x = id, y = `read number`, fill = exists)) +
     geom_bar(stat = "identity") +
-    scale_fill_manual(values = colors) +
+    scale_fill_manual(
+        values = c(
+        "TRUE" = "orange",
+        "FALSE" = "grey70"
+        )
+    ) +
     theme_bw() +
     theme(plot.background = element_rect(fill = "white")) +
-    facet_wrap(~ sample_name + index, scale = "free_y", ncol = ncol)
+    facet_wrap(~ sample_name + index, scales = "free_y", ncol = ncol)
 
 g_percent <-
-    ggplot(readnum, aes(x = id, y = per_reads, fill = id)) +
+    ggplot(readnum, aes(x = id, y = per_reads, fill = exists)) +
     geom_bar(stat = "identity") +
-    scale_fill_manual(values = colors) +
+    scale_fill_manual(
+        values = c(
+        "TRUE" = "orange",
+        "FALSE" = "grey70"
+        )
+    ) +
     theme_bw() +
     theme(plot.background = element_rect(fill = "white")) +
-    facet_wrap(~ sample_name + index, scale = "free_y", ncol = ncol)
+    facet_wrap(~ sample_name + index, scales = "free_y", ncol = ncol)
 
 # Save the plots
 ggsave(str_glue("reports/{Sys.Date()}/read_count.png"), g_count, width = width, height = height, limitsize = FALSE)
@@ -68,6 +79,8 @@ ggsave(str_glue("reports/{Sys.Date()}/read_percent.png"), g_percent, width = wid
 ggsave(str_glue("reports/{Sys.Date()}/read_percent.pdf"), g_percent, width = width, height = height, limitsize = FALSE)
 
 
+###############################################################################
 # Done
+###############################################################################
 cat(str_glue("Done! Have a look at reports/{Sys.Date()}"))
 cat("\n")
